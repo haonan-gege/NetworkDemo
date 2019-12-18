@@ -1,22 +1,17 @@
 package com.example.networkdemo;
 
-import android.app.DownloadManager;
 import android.graphics.drawable.Drawable;
-import android.nfc.Tag;
-import android.provider.Settings;
+import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.textclassifier.TextClassification;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.alibaba.fastjson.JSON;
-import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
@@ -24,9 +19,6 @@ import com.bumptech.glide.request.target.Target;
 import com.example.networkdemo.model.Ip;
 import com.example.networkdemo.model.IpData;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicHeader;
-import org.apache.http.message.BasicNameValuePair;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedInputStream;
@@ -34,22 +26,20 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.FormBody;
 import okhttp3.MediaType;
-import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class OkHttpActivity extends AppCompatActivity implements View.OnClickListener {
+
     private TextView tvResult;
     private Button btn;
     private Button btn1;
@@ -66,18 +56,29 @@ public class OkHttpActivity extends AppCompatActivity implements View.OnClickLis
     public static final MediaType MEDIA_TYPE_PNG = MediaType.parse("image/png");
     private static final String DOWNLOAD_URL = "https://github.com/zhayh/AndroidExample/blob/master/README.md";
 
+
+
+    // 请求的URL
+
+    private static final String IMAGE_URL = "https://img.alicdn.com/bao/uploaded/i2/100000294640179384/TB24I0xXNQa61Bjy0FhXXaalFXa_!!0-0-travel.jpg";
+//     private static final String IMAGE_URL = "https://source.unsplash.com/random/1000x600/?race,car";
+
+    // 指定MIME类型
+    public static final MediaType MEDIA_TYPE_JSON = MediaType.parse("application/json;charset=utf-8");
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main3);
 
         tvResult = findViewById(R.id.tvResult);
-        btn=findViewById(R.id.btn);
-        btn1=findViewById(R.id.btn1);
-        btn2=findViewById(R.id.btn2);
-        btn3=findViewById(R.id.btn3);
-        scrollView=findViewById(R.id.scro);
-        imageView=findViewById(R.id.image);
+        btn = findViewById(R.id.btn);
+        btn1 = findViewById(R.id.btn1);
+        btn2 = findViewById(R.id.btn2);
+        btn3 = findViewById(R.id.btn3);
+        scrollView = findViewById(R.id.scro);
+        imageView = findViewById(R.id.image);
 
         btn.setOnClickListener(this);
         btn1.setOnClickListener(this);
@@ -86,30 +87,30 @@ public class OkHttpActivity extends AppCompatActivity implements View.OnClickLis
         scrollView.setOnClickListener(this);
         imageView.setOnClickListener(this);
 
-//        GlideApp.with(this)
-//                .load("http://guolin.tech/book.png")
-//                .listener(new RequestListener<Drawable>() {
-//                    @Override
-//                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-//                        Log.d("OkHttpActivity", "加载失败 errorMsg：" + (e != null ? e.getMessage() : "null"));
-//                        return false;
-//                    }
-//
-//                    @Override
-//                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-//                        Log.d("OkHttpActivity", "成功  Drawable Name：" + resource.getClass().getCanonicalName());
-//                        return false;
-//                    }
-//                })
-//                .placeholder(R.mipmap.ic_launcher_round)
-//                .into(imageView);
+        GlideApp.with(this)
+                .load("http://guolin.tech/book.png")
+                .listener(new RequestListener<Drawable>() {
+                    @Override
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                        Log.d("OkHttpActivity", "加载失败 errorMsg：" + (e != null ? e.getMessage() : "null"));
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                        Log.d("OkHttpActivity", "成功  Drawable Name：" + resource.getClass().getCanonicalName());
+                        return false;
+                    }
+                }).placeholder(R.mipmap.ic_launcher_round)
+                .into(imageView);
 
     }
-
 
     @Override
     public void onClick(View view) {
         String path = getFilesDir().getAbsolutePath();
+        scrollView.setVisibility(View.VISIBLE);
+        imageView.setVisibility(View.GONE);
         switch (view.getId()) {
             case R.id.btn:
                 get(IP_URL);
@@ -122,8 +123,6 @@ public class OkHttpActivity extends AppCompatActivity implements View.OnClickLis
                 break;
 
             case R.id.btn2:
-//                scrollView.setVisibility(View.VISIBLE);
-//                imageView.setVisibility(View.GONE);
                 String fileName = path + File.separator + "readme.md";
                 uploadFile(UPLOAD_FILE_URL, fileName);
                 break;
@@ -134,6 +133,7 @@ public class OkHttpActivity extends AppCompatActivity implements View.OnClickLis
 
         }
     }
+
     private RequestBody setRequestBody(Map<String,String> params){
         FormBody.Builder builder=new FormBody.Builder();
         for(String key : params.keySet()){
@@ -153,7 +153,7 @@ public class OkHttpActivity extends AppCompatActivity implements View.OnClickLis
                 tvResult.post(new Runnable() {
                     @Override
                     public void run() {
-                        tvResult.setText("上传失败，"+e.getMessage());
+                        tvResult.setText(fileName + "上传失败");
                     }
                 });
             }
@@ -175,49 +175,52 @@ public class OkHttpActivity extends AppCompatActivity implements View.OnClickLis
             }
         });
     }
-    private void uploadImage(String url, final String fileName) {
-        // 1. 创建请求主体RequestBody
-        RequestBody fileBody = RequestBody.create(new File(fileName), MEDIA_TYPE_PNG);
-        RequestBody body = new MultipartBody.Builder()
-                .setType(MultipartBody.FORM)
-                .addFormDataPart("title", "头像")
-                .addFormDataPart("file", fileName, fileBody)
-                .build();
+//    private void uploadImage(String url, final String fileName) {
+//        // 1. 创建请求主体RequestBody
+//        RequestBody fileBody = RequestBody.create(new File(fileName), MEDIA_TYPE_PNG);
+//        RequestBody body = new MultipartBody.Builder()
+//                .setType(MultipartBody.FORM)
+//                .addFormDataPart("title", "头像")
+//                .addFormDataPart("file", fileName, fileBody)
+//                .build();
+//
+//        // 2. 创建请求
+//        Request request = new Request.Builder()
+//                .url(url)
+//                .header("Authorization", "Client-ID 4ff8b2fc6d5f339")
+//                .header("User-Agent", "NetworkDemo")
+//                .post(body)
+//                .build();
+//
+//        // 3. 创建OkHttpClient对象，发送请求，并处理回调
+//        OkHttpClient client = HttpsUtil.handleSSLHandshakeByOkHttp();
+//        client.newCall(request).enqueue(new Callback() {
+//            @Override
+//            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+//                Log.e(TAG, e.getMessage());
+//                runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        tvResult.setText(fileName + "上传失败");
+//                    }
+//                });
+//            }
+//
+//            @Override
+//            public void onResponse(@NotNull Call call, @NotNull final Response response) throws IOException {
+//                final String str = response.body().string();
+//                runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        tvResult.setText("上传成功，" + str);
+//                    }
+//                });
+//            }
+//        });
+//    }
 
-        // 2. 创建请求
-        Request request = new Request.Builder()
-                .url(url)
-                .header("Authorization", "Client-ID 4ff8b2fc6d5f339")
-                .header("User-Agent", "NetworkDemo")
-                .post(body)
-                .build();
 
-        // 3. 创建OkHttpClient对象，发送请求，并处理回调
-        OkHttpClient client = HttpsUtil.handleSSLHandshakeByOkHttp();
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                Log.e(TAG, e.getMessage());
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        tvResult.setText(fileName + "上传失败");
-                    }
-                });
-            }
 
-            @Override
-            public void onResponse(@NotNull Call call, @NotNull final Response response) throws IOException {
-                final String str = response.body().string();
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        tvResult.setText("上传成功，" + str);
-                    }
-                });
-            }
-        });
-    }
     public static void writeFile(InputStream is, String path, String fileName) throws IOException {
         // 1. 根据path创建目录对象，并检查path是否存在，不存在则创建
         File directory = new File(path);

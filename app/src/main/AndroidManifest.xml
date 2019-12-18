@@ -26,6 +26,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <meta-data
+            android:name="edu.niit.android.network.OkHttpGlideModule"
+            android:value="AppGlideModule" />
     </application>
 
 </manifest>
